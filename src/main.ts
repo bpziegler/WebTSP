@@ -1,10 +1,11 @@
 import tsp = require('./tsp');
 
-function run(numCity: number, canvas: HTMLCanvasElement, width: number, height: number) {
+async function run(numCity: number, canvas: HTMLCanvasElement, width: number, height: number) {
     const mainTSP = new tsp.TSP(numCity, canvas);
     mainTSP.initCities(width, height);
-    mainTSP.fullOptmize();
-    mainTSP.draw();
+    await mainTSP.fullOptmize();
+    await mainTSP.draw();
+    console.log("run function done");
 }
 
 export {

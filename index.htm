@@ -7,15 +7,15 @@
                 console.log("onresize");
                 var canvas = document.getElementById("myCanvas");
                 canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;            
+                canvas.height = window.innerHeight;
             }
             window.onload = () => {
                 console.log("onload");
                 var canvas = document.getElementById("myCanvas");
                 canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;            
+                canvas.height = window.innerHeight;
                 console.log(canvas.offsetWidth + " by " + canvas.offsetHeight);
-                webtsp.run(75, canvas, canvas.offsetWidth, canvas.offsetHeight);
+                webtsp.run(150, canvas, canvas.offsetWidth, canvas.offsetHeight);
                 console.log("webtsp.run complete");
             };
         </script>

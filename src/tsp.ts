@@ -1,4 +1,5 @@
-const BORDER = 4;
+const BORDER: number = 4;
+const CITY_RADIUS: number = 3;
 
 function shuffleAry(ary: number[]) {
     let counter: number = ary.length;
@@ -14,6 +15,17 @@ function shuffleAry(ary: number[]) {
         ary[index] = temp;
     }
     return ary;
+}
+
+async function timerPromise(waitMS: number): Promise<undefined> {
+    return new Promise<undefined>((resolve, reject) => {
+        let timerId: number;
+        let timerFunc = () => {
+            clearTimeout(timerId);
+            resolve();
+        }
+        timerId = setTimeout(timerFunc, waitMS);
+    });
 }
 
 class TSP {
@@ -142,35 +154,36 @@ class TSP {
         return 'elap ' + elap.toFixed(1) + '   iter ' + this.iter + '   ';
     }
 
-    public setProgress(desc: string, cur: number, max: number, extra?: string) {
+    public async setProgress(desc: string, cur: number, max: number, extra?: string) {
         if (Date.now() - this.lastProgress > 500) {
             this.lastProgress = Date.now();
             if (this.lastChangeStr) {
                 console.log(this.getLogPrefix() + this.lastChangeStr);
                 this.lastChangeStr = undefined;
-                this.draw();
+                await this.draw();
             } else {
                 console.log(this.getLogPrefix() + desc + '  ' + cur + ' of ' + max + '   ' + extra);
             }
-    }
+            await timerPromise(0);  // We do this so the user can refresh the page, etc
+        }
     }
 
-    public logChange(desc: string, numChange: number, minDis: number) {
+    public async logChange(desc: string, numChange: number, minDis: number) {
         this.lastChangeStr = desc + '  numChange ' + numChange + '   minDis ' + minDis.toFixed(1);
         if (Date.now() - this.lastProgress > 100) {
             this.lastProgress = Date.now();
             console.log(this.getLogPrefix() + this.lastChangeStr);
             this.lastChangeStr = undefined;
-            this.draw();
+            await this.draw();
         }
     }
 
-    public optimizeUsingMoveOne(): number {
+    public async optimizeUsingMoveOne(): Promise<number> {
         let numChange: number = 0;
         let minDis: number = this.calcTSPDis();
 
         for (let i: number = 0; i < this.numCity; i++) {
-            this.setProgress('optimizeUsingMoveOne', i, this.numCity, minDis.toFixed(1));
+            await this.setProgress('optimizeUsingMoveOne', i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
                 this.swapCity(i, j);
                 let curDis: number = this.calcTSPDis();
@@ -179,7 +192,7 @@ class TSP {
                 } else {
                     minDis = curDis;
                     numChange += 1;
-                    this.logChange('optimizeUsingMoveOne', numChange, minDis);
+                    await this.logChange('optimizeUsingMoveOne', numChange, minDis);
                 }
             }
         }
@@ -187,12 +200,12 @@ class TSP {
         return numChange;
     }
 
-    public optimizeUsingChangeFunc(desc: string, changeFunc: any): number {
+    public async optimizeUsingChangeFunc(desc: string, changeFunc: any): Promise<number> {
         let numChange: number = 0;
         let minDis: number = this.calcTSPDis();
 
         for (let i: number = 0; i < this.numCity; i++) {
-            this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
+            await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
                 for (let k: number = 0; k < this.numCity; k++) {
                     const origAry = this.orderAry.slice();
@@ -203,7 +216,7 @@ class TSP {
                     } else {
                         minDis = curDis;
                         numChange += 1;
-                        this.logChange(desc, numChange, minDis);
+                        await this.logChange(desc, numChange, minDis);
                     }
                 }
             }
@@ -212,32 +225,32 @@ class TSP {
         return numChange;
     }
 
-    public optimizeUsingSubPath(): number {
-        return this.optimizeUsingChangeFunc('optimizeUsingSubPath', (i: number, j: number, k: number) => { this.insertSubPath(i, j, k) });
+    public async optimizeUsingSubPath(): Promise<number> {
+        return await this.optimizeUsingChangeFunc('optimizeUsingSubPath', (i: number, j: number, k: number) => { this.insertSubPath(i, j, k) });
     }
 
-    public optimizeUsingRevPath(): number {
-        return this.optimizeUsingChangeFunc('optimizeUsingRevPath', (i: number, j: number, k: number) => { this.reversePath(i, j, k) });
+    public async optimizeUsingRevPath(): Promise<number> {
+        return await this.optimizeUsingChangeFunc('optimizeUsingRevPath', (i: number, j: number, k: number) => { this.reversePath(i, j, k) });
     }
 
-    public fullOptmize() {
+    public async fullOptmize() {
         this.iter = 0;
         this.startTime = Date.now();
         while (true) {
             this.iter += 1;
             let totChange: number = 0;
             while (true) {
-                const numChange = this.optimizeUsingMoveOne();
+                const numChange = await this.optimizeUsingMoveOne();
                 if (numChange == 0) break;
                 totChange += numChange;
             }
             while (true) {
-                const numChange = this.optimizeUsingSubPath();
+                const numChange =  await this.optimizeUsingSubPath();
                 if (numChange == 0) break;
                 totChange += numChange;
             }
             while (true) {
-                const numChange = this.optimizeUsingRevPath();
+                const numChange =  await this.optimizeUsingRevPath();
                 if (numChange == 0) break;
                 totChange += numChange;
             }
@@ -246,7 +259,7 @@ class TSP {
         this.setProgress('Done', 0, 0);
     }
 
-    public draw() {
+    public async draw() {
         const ctx: CanvasRenderingContext2D | null= this.canvas.getContext("2d");
         if (ctx) {
             ctx.scale(1, 1);
@@ -267,6 +280,16 @@ class TSP {
                 ctx.stroke();
                 ctx.closePath();
             }
+            for (let i: number = 0; i < this.numCity; i++) {
+                const p1 = this.orderAry[i];
+                const x1 = this.cityX[p1];
+                const y1 = this.cityY[p1];
+                ctx.beginPath();
+                ctx.arc(x1, y1, CITY_RADIUS, 0, 2*Math.PI, true);
+                ctx.fillStyle = 'blue';
+                ctx.fill();
+            }
+            await timerPromise(0);  // We do this so the canvas will draw
         }
     }
 }
