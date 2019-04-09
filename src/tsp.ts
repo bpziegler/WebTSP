@@ -249,7 +249,8 @@ class TSP {
     public draw() {
         const ctx: CanvasRenderingContext2D | null= this.canvas.getContext("2d");
         if (ctx) {
-            ctx.fillText("hello", 10, 10);
+            ctx.scale(1, 1);
+            // ctx.fillText("hello", 10, 10);
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, this.width, this.height);
 

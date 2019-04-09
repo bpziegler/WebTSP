@@ -1,10 +1,8 @@
 import tsp = require('./tsp');
 
-console.log("hello from main!");
-
-function run(numCity: number, c: HTMLCanvasElement) {
-    const mainTSP = new tsp.TSP(numCity, c);
-    mainTSP.initCities(500, 500);
+function run(numCity: number, canvas: HTMLCanvasElement, width: number, height: number) {
+    const mainTSP = new tsp.TSP(numCity, canvas);
+    mainTSP.initCities(width, height);
     mainTSP.fullOptmize();
     mainTSP.draw();
 }
