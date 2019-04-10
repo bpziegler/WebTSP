@@ -1,5 +1,9 @@
 const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
+const USE_MOVE_ONE: boolean = true;
+const USE_SUB_PATH: boolean = true;
+const USE_REV_PATH: boolean = false;
+
 
 function shuffleAry(ary: number[]) {
     let counter: number = ary.length;
@@ -138,13 +142,20 @@ class TSP {
     }
 
     public insertSubPath(dest: number, src: number, len: number) {
-        for (let i: number = 0; i < len; i++) {
+        for (let i: number = 0; i < len / 2; i++) {
             this.swapCity(this.wrap(dest+i), this.wrap(src+i));
         }
     }
 
+    public reversePathSimple(dest: number, src: number) {
+        const len = this.wrap(dest - src);
+        for (let i: number = 0; i < len / 2; i++) {
+            this.swapCity(this.wrap(dest+i), this.wrap(src+(len-1-i)));
+        }
+    }
+
     public reversePath(dest: number, src: number, len: number) {
-        for (let i: number = 0; i < len; i++) {
+        for (let i: number = 0; i < len / 2; i++) {
             this.swapCity(this.wrap(dest+i), this.wrap(src+(len-1-i)));
         }
     }
@@ -185,10 +196,12 @@ class TSP {
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress('optimizeUsingMoveOne', i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
-                this.swapCity(i, j);
+                // this.swapCity(i, j);
+                const origAry = this.orderAry.slice();
+                this.reversePathSimple(i, j);
                 let curDis: number = this.calcTSPDis();
                 if (curDis >= minDis) {
-                    this.swapCity(i, j);
+                    this.orderAry = origAry.slice();
                 } else {
                     minDis = curDis;
                     numChange += 1;
@@ -207,6 +220,7 @@ class TSP {
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
+                await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
                 for (let k: number = 0; k < this.numCity; k++) {
                     const origAry = this.orderAry.slice();
                     changeFunc(i, j, k);
@@ -239,17 +253,17 @@ class TSP {
         while (true) {
             this.iter += 1;
             let totChange: number = 0;
-            while (true) {
+            while (USE_MOVE_ONE) {
                 const numChange = await this.optimizeUsingMoveOne();
                 if (numChange == 0) break;
                 totChange += numChange;
             }
-            while (true) {
+            while (USE_SUB_PATH) {
                 const numChange =  await this.optimizeUsingSubPath();
                 if (numChange == 0) break;
                 totChange += numChange;
             }
-            while (true) {
+            while (USE_REV_PATH) {
                 const numChange =  await this.optimizeUsingRevPath();
                 if (numChange == 0) break;
                 totChange += numChange;
