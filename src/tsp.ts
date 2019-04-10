@@ -203,8 +203,8 @@ class TSP {
                 const p1Prev = this.orderAry[this.wrap(i-1)];
                 const p2 = this.orderAry[j];
                 const p2Next = this.orderAry[this.wrap(j+1)];
-                const oldVal: number = this.cityDis(p1Prev, p1) + this.cityDis(p2, p2Next);
-                const newVal: number = this.cityDis(p1Prev, p2) + this.cityDis(p1, p2Next);
+                const oldVal: number = this.cityDis[p1Prev][p1] + this.cityDis[p2][p2Next];
+                const newVal: number = this.cityDis[p1Prev][p2] + this.cityDis[p1][p2Next];
                 if (newVal < oldVal) {
                     minDis = minDis + newVal - oldVal;;
                     numChange += 1;
