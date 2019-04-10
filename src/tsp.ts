@@ -34,7 +34,7 @@ async function timerPromise(waitMS: number): Promise<undefined> {
 
 class TSP {
     private numCity: number;
-    private canvas: HTMLCanvasElement;
+    private canvas?: HTMLCanvasElement;
     private width: number = 0;
     private height: number = 0;
     public orderAry: number[] = [];
@@ -46,7 +46,7 @@ class TSP {
     public lastChangeStr?: string;
     public startTime: number = 0;
 
-    constructor(numCity: number, canvas: HTMLCanvasElement) {
+    constructor(numCity: number, canvas?: HTMLCanvasElement) {
         this.numCity = numCity;
         this.canvas = canvas;
     }
@@ -274,7 +274,7 @@ class TSP {
     }
 
     public async draw() {
-        const ctx: CanvasRenderingContext2D | null= this.canvas.getContext("2d");
+        const ctx: CanvasRenderingContext2D | null= (this.canvas) ? this.canvas.getContext("2d") : null;
         if (ctx) {
             ctx.scale(1, 1);
             // ctx.fillText("hello", 10, 10);
