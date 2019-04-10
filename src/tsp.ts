@@ -196,14 +196,17 @@ class TSP {
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress('optimizeUsingMoveOne', i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
-                // this.swapCity(i, j);
-                const origAry = this.orderAry.slice();
-                this.reversePathSimple(i, j);
-                let curDis: number = this.calcTSPDis();
-                if (curDis >= minDis) {
-                    this.orderAry = origAry.slice();
-                } else {
-                    minDis = curDis;
+                // Subtract values - we are reversing the path from p1 to p2
+                // So subtract p1Prev dis p1, and p2 dis p2Next
+                // Then add p1Prev dis p2, and p1 dis p2Next
+                const p1 = this.orderAry[i];
+                const p1Prev = this.orderAry[this.wrap(i-1)];
+                const p2 = this.orderAry[j];
+                const p2Next = this.orderAry[this.wrap(j+1)];
+                const oldVal: number = this.cityDis(p1Prev, p1) + this.cityDis(p2, p2Next);
+                const newVal: number = this.cityDis(p1Prev, p2) + this.cityDis(p1, p2Next);
+                if (newVal < oldVal) {
+                    minDis = minDis + newVal - oldVal;;
                     numChange += 1;
                     await this.logChange('optimizeUsingMoveOne', numChange, minDis);
                 }
