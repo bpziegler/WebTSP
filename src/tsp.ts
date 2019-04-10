@@ -207,6 +207,7 @@ class TSP {
                 const newVal: number = this.cityDis[p1Prev][p2] + this.cityDis[p1][p2Next];
                 if (newVal < oldVal) {
                     minDis = minDis + newVal - oldVal;;
+                    this.reversePathSimple(i, j);
                     numChange += 1;
                     await this.logChange('optimizeUsingMoveOne', numChange, minDis);
                 }
