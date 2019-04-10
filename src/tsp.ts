@@ -1,7 +1,7 @@
 const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
 const USE_MOVE_ONE: boolean = true;
-const USE_SUB_PATH: boolean = true;
+const USE_SUB_PATH: boolean = false;
 const USE_REV_PATH: boolean = false;
 
 
@@ -199,14 +199,18 @@ class TSP {
                 // Subtract values - we are reversing the path from p1 to p2
                 // So subtract p1Prev dis p1, and p2 dis p2Next
                 // Then add p1Prev dis p2, and p1 dis p2Next
-                const p1 = this.orderAry[i];
                 const p1Prev = this.orderAry[this.wrap(i-1)];
+                const p1 = this.orderAry[i];
                 const p2 = this.orderAry[j];
                 const p2Next = this.orderAry[this.wrap(j+1)];
-                const oldVal: number = this.cityDis[p1Prev][p1] + this.cityDis[p2][p2Next];
-                const newVal: number = this.cityDis[p1Prev][p2] + this.cityDis[p1][p2Next];
+                const oldp1: number = this.cityDis[p1Prev][p1];
+                const oldp2: number = this.cityDis[p2][p2Next];
+                const oldVal: number = oldp1 + oldp2;
+                const newp1: number = this.cityDis[p1Prev][p2];
+                const newp2: number = this.cityDis[p1][p2Next];
+                const newVal: number = newp1 + newp2;
                 if (newVal < oldVal) {
-                    minDis = minDis + newVal - oldVal;;
+                    minDis = minDis + newVal - oldVal;
                     this.reversePathSimple(i, j);
                     numChange += 1;
                     await this.logChange('optimizeUsingMoveOne', numChange, minDis);
