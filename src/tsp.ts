@@ -142,7 +142,7 @@ class TSP {
     }
 
     public insertSubPath(dest: number, src: number, len: number) {
-        for (let i: number = 0; i < len / 2; i++) {
+        for (let i: number = 0; i < len; i++) {
             this.swapCity(this.wrap(dest+i), this.wrap(src+i));
         }
     }
@@ -155,7 +155,7 @@ class TSP {
     }
 
     public reversePath(dest: number, src: number, len: number) {
-        for (let i: number = 0; i < len / 2; i++) {
+        for (let i: number = 0; i < len; i++) {
             this.swapCity(this.wrap(dest+i), this.wrap(src+(len-1-i)));
         }
     }
@@ -196,7 +196,6 @@ class TSP {
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress('optimizeUsingMoveOne', i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
-                // this.swapCity(i, j);
                 const origAry = this.orderAry.slice();
                 this.reversePathSimple(i, j);
                 let curDis: number = this.calcTSPDis();
@@ -217,11 +216,13 @@ class TSP {
         let numChange: number = 0;
         let minDis: number = this.calcTSPDis();
 
+        const maxLen: number = Math.sqrt(this.numCity);
+
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
             for (let j: number = 0; j < this.numCity; j++) if (i != j) {
                 await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
-                for (let k: number = 0; k < this.numCity; k++) {
+                for (let k: number = 0; k < maxLen; k++) {
                     const origAry = this.orderAry.slice();
                     changeFunc(i, j, k);
                     let curDis: number = this.calcTSPDis();
