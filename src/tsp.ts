@@ -2,7 +2,7 @@ const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
 const USE_MOVE_ONE: boolean = true;
 const USE_SUB_PATH: boolean = true;
-const USE_REV_PATH: boolean = false;
+const USE_REV_PATH: boolean = true;
 
 
 function shuffleAry(ary: number[]) {
@@ -34,7 +34,8 @@ async function timerPromise(waitMS: number): Promise<undefined> {
 
 class TSP {
     private numCity: number;
-    private canvas?: HTMLCanvasElement;
+    private canvas: HTMLCanvasElement;
+    private statusSpan: HTMLElement;
     private width: number = 0;
     private height: number = 0;
     public orderAry: number[] = [];
@@ -45,10 +46,12 @@ class TSP {
     public lastProgress: number = 0;
     public lastChangeStr?: string;
     public startTime: number = 0;
+    public needStop: boolean = false;
 
-    constructor(numCity: number, canvas?: HTMLCanvasElement) {
+    constructor(numCity: number, canvas: HTMLCanvasElement, statusSpan: HTMLElement) {
         this.numCity = numCity;
         this.canvas = canvas;
+        this.statusSpan = statusSpan;
     }
 
     public wrap(idx: number): number {
@@ -169,11 +172,15 @@ class TSP {
         if (Date.now() - this.lastProgress > 500) {
             this.lastProgress = Date.now();
             if (this.lastChangeStr) {
-                console.log(this.getLogPrefix() + this.lastChangeStr);
+                var s: string = this.getLogPrefix() + this.lastChangeStr;
+                console.log(s);
+                this.statusSpan.innerHTML = s;
                 this.lastChangeStr = undefined;
                 await this.draw();
             } else {
-                console.log(this.getLogPrefix() + desc + '  ' + cur + ' of ' + max + '   ' + extra);
+                var s: string = this.getLogPrefix() + desc + '  ' + cur + ' of ' + max + '   ' + extra;
+                console.log(s);
+                this.statusSpan.innerHTML = s;
             }
             await timerPromise(0);  // We do this so the user can refresh the page, etc
         }
@@ -183,7 +190,9 @@ class TSP {
         this.lastChangeStr = desc + '  numChange ' + numChange + '   minDis ' + minDis.toFixed(1);
         if (Date.now() - this.lastProgress > 100) {
             this.lastProgress = Date.now();
-            console.log(this.getLogPrefix() + this.lastChangeStr);
+            var s: string = this.getLogPrefix() + this.lastChangeStr;
+            console.log(s);
+            this.statusSpan.innerHTML = s;
             this.lastChangeStr = undefined;
             await this.draw();
         }
@@ -271,10 +280,19 @@ class TSP {
             }
             if (totChange == 0) break;
         }
+        await this.draw();
         this.setProgress('Done', 0, 0);
     }
 
+    public stop() {
+        this.needStop = true;
+    }
+
     public async draw() {
+        if (this.needStop) {
+            throw new Error('Do Stop');
+        }
+
         const ctx: CanvasRenderingContext2D | null= (this.canvas) ? this.canvas.getContext("2d") : null;
         if (ctx) {
             ctx.scale(1, 1);
