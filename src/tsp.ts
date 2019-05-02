@@ -169,6 +169,10 @@ class TSP {
     }
 
     public async setProgress(desc: string, cur: number, max: number, extra?: string) {
+        if (this.needStop) {
+            throw new Error('Do Stop');
+        }
+
         if (Date.now() - this.lastProgress > 500) {
             this.lastProgress = Date.now();
             if (this.lastChangeStr) {
@@ -225,7 +229,8 @@ class TSP {
         let numChange: number = 0;
         let minDis: number = this.calcTSPDis();
 
-        const maxLen: number = Math.sqrt(this.numCity);
+        // const maxLen: number = Math.sqrt(this.numCity);
+        const maxLen: number = this.numCity / 2;
 
         for (let i: number = 0; i < this.numCity; i++) {
             await this.setProgress(desc, i, this.numCity, minDis.toFixed(1));
@@ -265,18 +270,18 @@ class TSP {
             let totChange: number = 0;
             while (USE_MOVE_ONE) {
                 const numChange = await this.optimizeUsingMoveOne();
-                if (numChange == 0) break;
                 totChange += numChange;
+                if (numChange == 0) break;
             }
             while (USE_SUB_PATH) {
                 const numChange =  await this.optimizeUsingSubPath();
-                if (numChange == 0) break;
                 totChange += numChange;
+                if (numChange >= 0) break;
             }
             while (USE_REV_PATH) {
                 const numChange =  await this.optimizeUsingRevPath();
-                if (numChange == 0) break;
                 totChange += numChange;
+                if (numChange >= 0) break;
             }
             if (totChange == 0) break;
         }
