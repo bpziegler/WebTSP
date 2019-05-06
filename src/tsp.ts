@@ -1,9 +1,5 @@
 const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
-const USE_MOVE_ONE: boolean = true;
-const USE_SUB_PATH: boolean = true;
-const USE_REV_PATH: boolean = true;
-
 
 function shuffleAry(ary: number[]) {
     let counter: number = ary.length;
@@ -47,11 +43,17 @@ class TSP {
     public lastChangeStr?: string;
     public startTime: number = 0;
     public needStop: boolean = false;
+    public doMove: boolean;
+    public doSubPath: boolean;
+    public doRevPath: boolean;
 
-    constructor(numCity: number, canvas: HTMLCanvasElement, statusSpan: HTMLElement) {
+    constructor(numCity: number, canvas: HTMLCanvasElement, statusSpan: HTMLElement, doMove: boolean, doSubPath: boolean, doRevPath: boolean) {
         this.numCity = numCity;
         this.canvas = canvas;
         this.statusSpan = statusSpan;
+        this.doMove = doMove;
+        this.doSubPath = doSubPath;
+        this.doRevPath = doRevPath;
     }
 
     public wrap(idx: number): number {
@@ -268,17 +270,17 @@ class TSP {
         while (true) {
             this.iter += 1;
             let totChange: number = 0;
-            while (USE_MOVE_ONE) {
+            while (this.doMove) {
                 const numChange = await this.optimizeUsingMoveOne();
                 totChange += numChange;
                 if (numChange == 0) break;
             }
-            while (USE_SUB_PATH) {
+            while (this.doSubPath) {
                 const numChange =  await this.optimizeUsingSubPath();
                 totChange += numChange;
                 if (numChange >= 0) break;
             }
-            while (USE_REV_PATH) {
+            while (this.doRevPath) {
                 const numChange =  await this.optimizeUsingRevPath();
                 totChange += numChange;
                 if (numChange >= 0) break;

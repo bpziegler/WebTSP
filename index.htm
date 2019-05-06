@@ -8,6 +8,9 @@
         var startButElem;
         var stopButElem;
         var statusSpanElem;
+        var checkMoveOne;
+        var checkSubPath;
+        var checkRevPath;
         var tsp = null;
         window.onresize = () => {
             console.log("onresize");
@@ -19,6 +22,9 @@
             startButElem = document.getElementById("startBut");
             stopButElem = document.getElementById("stopBut");
             statusSpanElem = document.getElementById("statusSpan");
+            checkMoveOne = document.getElementById("checkMoveOne");
+            checkSubPath = document.getElementById("checkSubPath");
+            checkRevPath = document.getElementById("checkRevPath");
         };
         function setRunning(running) {
             startButElem.disabled = running;
@@ -38,7 +44,8 @@
             var td = canvasElem.parentNode;
             canvasElem.width = td.clientWidth;
             canvasElem.height = td.clientHeight;
-            tsp = webtsp.run(parseInt(numCityInputElem.value), canvasElem, canvasElem.offsetWidth, canvasElem.offsetHeight, statusSpanElem);
+            tsp = webtsp.run(parseInt(numCityInputElem.value), canvasElem, canvasElem.offsetWidth, canvasElem.offsetHeight, statusSpanElem,
+            checkMoveOne.checked, checkSubPath.checked, checkRevPath.checked);
             tsp.fullOptmize().then(() => setRunning(false));
         }
         function stop() {
@@ -71,6 +78,11 @@
                         &nbsp;
                         &nbsp;
                         <input id="numCityInput" type="text" value="300" style="height:28px;width:80px"></input>
+                        &nbsp;
+                        &nbsp;
+                        <input type="checkbox" id="checkMoveOne" checked>Move One
+                        <input type="checkbox" id="checkSubPath" checked>Sub Path
+                        <input type="checkbox" id="checkRevPath" checked>Rev Path
                     </td>
                 </tr>
                 <tr>
