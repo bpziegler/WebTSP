@@ -328,34 +328,35 @@ class TSP {
             ctx.fillRect(0, 0, this.width, this.height);
 
             for (let i: number = 0; i < this.numCity; i++) {
-                const p1 = this.orderAry[i];
-                const p2 = this.orderAry[this.wrap(i+1)];
-                const x1 = this.cityX[p1];
-                const y1 = this.cityY[p1];
-                const x2 = this.cityX[p2];
-                const y2 = this.cityY[p2];
+                const p1: number = this.orderAry[i];
+                const p2: number = this.orderAry[this.wrap(i+1)];
+                const x1: number = this.cityX[p1];
+                const y1: number = this.cityY[p1];
+                const x2: number = this.cityX[p2];
+                const y2: number = this.cityY[p2];
                 ctx.beginPath();
+                ctx.strokeStyle = "#000000";
                 ctx.moveTo(x1, y1);
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
                 ctx.closePath();
             }
 
-            for (let i: number = 0; i < this.clusters.length; i++) {
-                const clusterPt = this.clusterCenters[i];
-                ctx.beginPath();
-                ctx.fillStyle = 'blue';
-                ctx.fillStyle = this.clusterColors[i];
-                ctx.fillText(i.toString() /* + " " + this.clusterColors[i] */, clusterPt.x, clusterPt.y);
-                ctx.closePath();
-            }
-
             for (let i: number = 0; i < this.numCity; i++) {
-                const p1 = this.orderAry[i];
-                const x1 = this.cityX[p1];
-                const y1 = this.cityY[p1];
+                const p1: number = this.orderAry[i];
+                const x1: number = this.cityX[p1];
+                const y1: number = this.cityY[p1];
                 const pt: Point = new Point(x1, y1);
-                const nearestClusterIdx = findNearestPoint(pt, this.clusterCenters);
+                const nearestClusterIdx: number = findNearestPoint(pt, this.clusterCenters);
+                const clusterPt: Point = this.clusterCenters[nearestClusterIdx];
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#e0e0e0";
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(clusterPt.x, clusterPt.y);
+                ctx.stroke();
+                ctx.closePath();
+
                 ctx.beginPath();
                 ctx.fillStyle = 'blue';
                 ctx.fillStyle = this.clusterColors[nearestClusterIdx];
@@ -368,6 +369,16 @@ class TSP {
                 // ctx.fillText(nearestClusterIdx.toString() /* + " " + this.clusterColors[nearestClusterIdx] */, x1, y1);
                 // ctx.closePath();
             }
+
+            for (let i: number = 0; i < this.clusters.length; i++) {
+                const clusterPt = this.clusterCenters[i];
+                ctx.beginPath();
+                ctx.fillStyle = 'blue';
+                ctx.fillStyle = this.clusterColors[i];
+                ctx.fillText(i.toString() /* + " " + this.clusterColors[i] */, clusterPt.x, clusterPt.y);
+                ctx.closePath();
+            }
+
             await timerPromise(0);  // We do this so the canvas will draw
         }
     }
