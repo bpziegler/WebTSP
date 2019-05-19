@@ -342,9 +342,12 @@ class TSP {
             }
 
             for (let i: number = 0; i < this.clusters.length; i++) {
-                const cluster = this.clusters[i];
+                const clusterPt = this.clusterCenters[i];
+                ctx.beginPath();
+                ctx.fillStyle = 'blue';
                 ctx.fillStyle = this.clusterColors[i];
-                ctx.fillText(i.toString(), cluster.center.x, cluster.center.y);
+                ctx.fillText(i.toString() /* + " " + this.clusterColors[i] */, clusterPt.x, clusterPt.y);
+                ctx.closePath();
             }
 
             for (let i: number = 0; i < this.numCity; i++) {
@@ -352,12 +355,18 @@ class TSP {
                 const x1 = this.cityX[p1];
                 const y1 = this.cityY[p1];
                 const pt: Point = new Point(x1, y1);
-                const clusterIdx = findNearestPoint(pt, this.clusterCenters);
-                ctx.fillStyle = this.clusterColors[clusterIdx];
-                // ctx.fillStyle = 'blue';
+                const nearestClusterIdx = findNearestPoint(pt, this.clusterCenters);
                 ctx.beginPath();
+                ctx.fillStyle = 'blue';
+                ctx.fillStyle = this.clusterColors[nearestClusterIdx];
                 ctx.arc(x1, y1, CITY_RADIUS, 0, 2*Math.PI, true);
                 ctx.fill();
+                ctx.closePath();
+
+                // ctx.beginPath();
+                // ctx.fillStyle = this.clusterColors[nearestClusterIdx];
+                // ctx.fillText(nearestClusterIdx.toString() /* + " " + this.clusterColors[nearestClusterIdx] */, x1, y1);
+                // ctx.closePath();
             }
             await timerPromise(0);  // We do this so the canvas will draw
         }
