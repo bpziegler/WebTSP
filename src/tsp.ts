@@ -5,6 +5,10 @@ const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
 const IDEAL_CLUSTER_SIZE: number = 75;
 
+function hexString(num: number, len: number): string {
+    return ("000000000000000" + num.toString(16)).substr(-len);
+}
+
 function shuffleAry(ary: number[]) {
     let counter: number = ary.length;
     while(counter > 0) {
@@ -94,7 +98,10 @@ class TSP {
             const red = Math.floor(Math.random() * 256);
             const grn = Math.floor(Math.random() * 256);
             const blu = Math.floor(Math.random() * 256);
-            const color: string = '#' + red.toString(16) + grn.toString(16) + blu.toString(16);
+            const color: string = '#'  + hexString(red, 2) + hexString(grn, 2) + hexString(blu, 2);
+            if (color.length !== 7) {
+                throw new Error("Bad color!");
+            }
             this.clusterColors.push(color);
         }
     }
@@ -370,7 +377,6 @@ class TSP {
                 const nearestClusterIdx: number = findNearestPoint(pt, this.clusterCenters);
 
                 ctx.beginPath();
-                ctx.fillStyle = 'blue';  // This line seems to "fix" the color change bug?
                 ctx.fillStyle = this.clusterColors[nearestClusterIdx];
                 ctx.arc(x1, y1, CITY_RADIUS, 0, 2*Math.PI, true);
                 ctx.fill();
@@ -381,7 +387,6 @@ class TSP {
             for (let i: number = 0; i < this.clusters.length; i++) {
                 const clusterPt = this.clusterCenters[i];
                 ctx.beginPath();
-                ctx.fillStyle = 'blue';  // This line seems to "fix" the color change bug?
                 ctx.fillStyle = this.clusterColors[i];
                 ctx.fillText(i.toString(), clusterPt.x, clusterPt.y);
                 ctx.closePath();
