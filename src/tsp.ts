@@ -3,6 +3,7 @@ import { Cluster, findNearestPoint } from "./cluster";
 
 const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
+const IDEAL_CLUSTER_SIZE: number = 75;
 
 function shuffleAry(ary: number[]) {
     let counter: number = ary.length;
@@ -85,7 +86,7 @@ class TSP {
             this.cityPoints.push(new Point(this.cityX[i], this.cityY[i]));
         }
         this.calcCityPairsDis();
-        this.numCluster = Math.floor(Math.sqrt(this.numCity));
+        this.numCluster = Math.ceil(this.numCity / IDEAL_CLUSTER_SIZE);
         this.clusters = Cluster.createClusters(this.cityPoints, this.numCluster);
         this.clusterCenters = this.clusters.map(cluster => cluster.center);
         this.clusterColors = [];
@@ -327,6 +328,24 @@ class TSP {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, this.width, this.height);
 
+            // Draw Cluster Lines
+            for (let i: number = 0; i < this.numCity; i++) {
+                const p1: number = this.orderAry[i];
+                const x1: number = this.cityX[p1];
+                const y1: number = this.cityY[p1];
+                const pt: Point = new Point(x1, y1);
+                const nearestClusterIdx: number = findNearestPoint(pt, this.clusterCenters);
+                const clusterPt: Point = this.clusterCenters[nearestClusterIdx];
+
+                ctx.beginPath();
+                ctx.strokeStyle = "#e0e0e0";
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(clusterPt.x, clusterPt.y);
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            // Draw City Path Lines
             for (let i: number = 0; i < this.numCity; i++) {
                 const p1: number = this.orderAry[i];
                 const p2: number = this.orderAry[this.wrap(i+1)];
@@ -342,40 +361,29 @@ class TSP {
                 ctx.closePath();
             }
 
+            // Draw Cities
             for (let i: number = 0; i < this.numCity; i++) {
                 const p1: number = this.orderAry[i];
                 const x1: number = this.cityX[p1];
                 const y1: number = this.cityY[p1];
                 const pt: Point = new Point(x1, y1);
                 const nearestClusterIdx: number = findNearestPoint(pt, this.clusterCenters);
-                const clusterPt: Point = this.clusterCenters[nearestClusterIdx];
 
                 ctx.beginPath();
-                ctx.strokeStyle = "#e0e0e0";
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(clusterPt.x, clusterPt.y);
-                ctx.stroke();
-                ctx.closePath();
-
-                ctx.beginPath();
-                ctx.fillStyle = 'blue';
+                ctx.fillStyle = 'blue';  // This line seems to "fix" the color change bug?
                 ctx.fillStyle = this.clusterColors[nearestClusterIdx];
                 ctx.arc(x1, y1, CITY_RADIUS, 0, 2*Math.PI, true);
                 ctx.fill();
                 ctx.closePath();
-
-                // ctx.beginPath();
-                // ctx.fillStyle = this.clusterColors[nearestClusterIdx];
-                // ctx.fillText(nearestClusterIdx.toString() /* + " " + this.clusterColors[nearestClusterIdx] */, x1, y1);
-                // ctx.closePath();
             }
 
+            // Draw Cluster centers
             for (let i: number = 0; i < this.clusters.length; i++) {
                 const clusterPt = this.clusterCenters[i];
                 ctx.beginPath();
-                ctx.fillStyle = 'blue';
+                ctx.fillStyle = 'blue';  // This line seems to "fix" the color change bug?
                 ctx.fillStyle = this.clusterColors[i];
-                ctx.fillText(i.toString() /* + " " + this.clusterColors[i] */, clusterPt.x, clusterPt.y);
+                ctx.fillText(i.toString(), clusterPt.x, clusterPt.y);
                 ctx.closePath();
             }
 
