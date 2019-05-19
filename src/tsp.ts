@@ -1,3 +1,6 @@
+import { Point } from "./point";
+import { Cluster, findNearestPoint } from "./cluster";
+
 const BORDER: number = 4;
 const CITY_RADIUS: number = 3;
 
@@ -46,6 +49,11 @@ class TSP {
     public doMove: boolean;
     public doSubPath: boolean;
     public doRevPath: boolean;
+    public cityPoints: Point[] = [];
+    public numCluster: number = 0;
+    public clusters: Cluster[] = [];
+    public clusterColors: string[] = [];
+    public clusterCenters: Point[] = [];
 
     constructor(numCity: number, canvas: HTMLCanvasElement, statusSpan: HTMLElement, doMove: boolean, doSubPath: boolean, doRevPath: boolean) {
         this.numCity = numCity;
@@ -74,8 +82,20 @@ class TSP {
         for (let i: number = 0; i < this.numCity; i++) {
             this.cityX[i] = Math.random() * (width - BORDER*2) + BORDER;
             this.cityY[i] = Math.random() * (height - BORDER*2) + BORDER;
+            this.cityPoints.push(new Point(this.cityX[i], this.cityY[i]));
         }
         this.calcCityPairsDis();
+        this.numCluster = Math.floor(Math.sqrt(this.numCity));
+        this.clusters = Cluster.createClusters(this.cityPoints, this.numCluster);
+        this.clusterCenters = this.clusters.map(cluster => cluster.center);
+        this.clusterColors = [];
+        for (let i: number = 0; i < this.numCluster; i++) {
+            const red = Math.floor(Math.random() * 256);
+            const grn = Math.floor(Math.random() * 256);
+            const blu = Math.floor(Math.random() * 256);
+            const color: string = '#' + red.toString(16) + grn.toString(16) + blu.toString(16);
+            this.clusterColors.push(color);
+        }
     }
 
     public calcCityPairsDis() {
@@ -320,13 +340,23 @@ class TSP {
                 ctx.stroke();
                 ctx.closePath();
             }
+
+            for (let i: number = 0; i < this.clusters.length; i++) {
+                const cluster = this.clusters[i];
+                ctx.fillStyle = this.clusterColors[i];
+                ctx.fillText(i.toString(), cluster.center.x, cluster.center.y);
+            }
+
             for (let i: number = 0; i < this.numCity; i++) {
                 const p1 = this.orderAry[i];
                 const x1 = this.cityX[p1];
                 const y1 = this.cityY[p1];
+                const pt: Point = new Point(x1, y1);
+                const clusterIdx = findNearestPoint(pt, this.clusterCenters);
+                ctx.fillStyle = this.clusterColors[clusterIdx];
+                // ctx.fillStyle = 'blue';
                 ctx.beginPath();
                 ctx.arc(x1, y1, CITY_RADIUS, 0, 2*Math.PI, true);
-                ctx.fillStyle = 'blue';
                 ctx.fill();
             }
             await timerPromise(0);  // We do this so the canvas will draw
